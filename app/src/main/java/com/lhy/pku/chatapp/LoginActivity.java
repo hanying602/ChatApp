@@ -1,5 +1,6 @@
 package com.lhy.pku.chatapp;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -69,6 +70,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+    private void toMainActivity(){
+        Intent intent = new Intent();
+        intent.setClass(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
     private void login(String userId, final String password) {
         showProgressbar();
@@ -84,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
                             hideProgressbar();
+                            toMainActivity();
                         } else {
                             Toast.makeText(LoginActivity.this, "Wrong password", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Wrong password");
