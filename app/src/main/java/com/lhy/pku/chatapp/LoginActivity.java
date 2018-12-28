@@ -16,8 +16,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lhy.pku.chatapp.Config.UserInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +82,8 @@ public class LoginActivity extends AppCompatActivity {
     private void login(String userId, final String password) {
         showProgressbar();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("User").document(userId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        final DocumentReference userRef = db.collection("User").document(userId);
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -90,6 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (password.equals(document.get("password"))) {
                             Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
+                            UserInfo.getInstance().setUserReference(userRef);
                             hideProgressbar();
                             toMainActivity();
                         } else {
@@ -139,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         hideProgressbar();
+                                        Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_SHORT).show();
                                         Log.d(TAG, "DocumentSnapshot successfully written!");
                                     }
                                 })
@@ -146,6 +151,7 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         hideProgressbar();
+                                        Toast.makeText(LoginActivity.this, "Failed" , Toast.LENGTH_SHORT).show();
                                         Log.w(TAG, "Error writing document", e);
                                     }
                                 });
