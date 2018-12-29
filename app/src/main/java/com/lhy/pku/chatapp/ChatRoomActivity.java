@@ -57,9 +57,13 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         if (getIntent().getExtras() != null) {
             String roomID = getIntent().getExtras().getString("room_id", "");
+            String otherUserID = getIntent().getExtras().getString("other_user_id", "");
             Log.i(TAG, "onCreate: " + roomID);
             userRef = UserInfo.getInstance().getUserSnapshot().getReference();
             chatRoomReference = FirebaseFirestore.getInstance().collection("Chatroom").document(roomID);
+            if(getSupportActionBar()!=null)
+                getSupportActionBar().setTitle(otherUserID);
+
         }
 
         initView();

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.lhy.pku.chatapp.Config.UserInfo;
 import com.lhy.pku.chatapp.LoginActivity;
+import com.lhy.pku.chatapp.MainActivity;
 import com.lhy.pku.chatapp.R;
 
 
@@ -29,6 +30,7 @@ public class SettingsFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_settings, container, false);
         initView();
         setClickHandler();
+
         return view;
     }
     private void initView(){

@@ -70,7 +70,7 @@ public class ChatListFragment extends Fragment {
         Consumer<LatestMessage> mClickConsumer = new Consumer<LatestMessage>() {
             @Override
             public void accept(@NonNull LatestMessage message) throws Exception {
-               intentToChatRoom(message.getRoomID());
+               intentToChatRoom(message.getRoomID(),message.getUserID());
             }
         };
         adapter.getPositionClicks().subscribe(mClickConsumer);
@@ -80,9 +80,10 @@ public class ChatListFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
-    private void intentToChatRoom(String roomID) {
+    private void intentToChatRoom(String roomID, String otherUserID) {
         Intent intent = new Intent();
         intent.putExtra("room_id", roomID);
+        intent.putExtra("other_user_id", otherUserID);
         startActivity(intent.setClass(getContext(), ChatRoomActivity.class));
     }
 

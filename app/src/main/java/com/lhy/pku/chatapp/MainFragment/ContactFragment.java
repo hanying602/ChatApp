@@ -77,9 +77,10 @@ public class ContactFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
-    private void intentToChatRoom(String roomID) {
+    private void intentToChatRoom(String roomID, String otherUserID) {
         Intent intent = new Intent();
         intent.putExtra("room_id", roomID);
+        intent.putExtra("other_user_id", otherUserID);
         startActivity(intent.setClass(getContext(), ChatRoomActivity.class));
     }
 
@@ -96,7 +97,7 @@ public class ContactFragment extends Fragment {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
                                     if(((List<DocumentReference>)document.get("members")).contains(otherUserRef)){
-                                        intentToChatRoom(document.getId());
+                                        intentToChatRoom(document.getId(),otherUserRef.getId());
                                     }
                                 }
                             } else {

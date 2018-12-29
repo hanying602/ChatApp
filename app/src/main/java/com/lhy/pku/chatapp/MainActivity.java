@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 int tabIconColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
                 if (tab.getIcon() != null)
                     tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+                if(getSupportActionBar()!=null)
+                    getSupportActionBar().setTitle(tab.getText());
             }
 
             @Override
