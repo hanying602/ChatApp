@@ -1,35 +1,40 @@
 package com.lhy.pku.chatapp.MainFragment;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.model.value.ReferenceValue;
+import com.lhy.pku.chatapp.Adapter.ChatListAdapter;
 import com.lhy.pku.chatapp.Config.UserInfo;
-import com.lhy.pku.chatapp.LoginActivity;
+import com.lhy.pku.chatapp.model.LatestMessage;
 import com.lhy.pku.chatapp.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.functions.Consumer;
 
 
 public class ChatListFragment extends Fragment {
 
     private View view;
     private static final String TAG = ChatListFragment.class.getSimpleName();
+    private RecyclerView recyclerView;
+    private ChatListAdapter adapter;
+    private List<LatestMessage> chatRoomList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,6 +42,7 @@ public class ChatListFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_chat_list, container, false);
 
         initView();
+        initAdapter();
         getChatList();
 
         return view;
@@ -44,14 +50,28 @@ public class ChatListFragment extends Fragment {
 
     private void initView() {
 
+        recyclerView = view.findViewById(R.id.chatlist_recyclerview);
+    }
+
+    private void initAdapter() {
+        RecyclerView recyclerView = view.findViewById(R.id.chatlist_recyclerview);
+        chatRoomList = new ArrayList<>();
+        adapter = new ChatListAdapter(chatRoomList);
+        Consumer<LatestMessage> mClickConsumer = new Consumer<LatestMessage>() {
+            @Override
+            public void accept(@NonNull LatestMessage message) throws Exception {
+            }
+        };
+        adapter.getPositionClicks().subscribe(mClickConsumer);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
     }
 
     private void getChatList() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = UserInfo.getInstance().getUserReference();
-        Log.i(TAG, "getChatList: " + userRef.getPath());
-        Log.i(TAG, "getChatList: " + userRef.getId());
-        Log.i(TAG, "getChatList: " + userRef);
 
         db.collection("Chatroom")
                 .whereArrayContains("members", userRef)
@@ -61,9 +81,10 @@ public class ChatListFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             if (!task.getResult().isEmpty()) {
+                                chatRoomList.clear();
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
-                                    getLatestMessage(document.getReference());
+                                    getLatestMessage(document.getDocumentReference("latest_message").getPath());
                                 }
                             } else {
                                 Log.d(TAG, "No such document");
@@ -77,27 +98,30 @@ public class ChatListFragment extends Fragment {
 
     }
 
-    private void getLatestMessage(DocumentReference documentReference) {
-        documentReference.collection("Message")
-                .orderBy("time", Query.Direction.DESCENDING)
-                .limit(1)
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    private void getLatestMessage(String path) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.document(path).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    if (!task.getResult().isEmpty()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d("message", document.getId() + " => " + document.getData());
-                        }
+                    if (task.getResult().exists()) {
+                        DocumentSnapshot document = task.getResult();
+                        Log.d("getLatestMessage", document.getId() + " => " + document.getData());
+                        LatestMessage latestMessage = new LatestMessage();
+                        latestMessage.setContent(document.getString("content"));
+                        latestMessage.setTime(document.getDate("time"));
+                        latestMessage.setUserID(document.getDocumentReference("from").getId());
+                        chatRoomList.add(latestMessage);
                     } else {
-                        Log.d("message", "No such document");
+                        Log.d("getLatestMessage", "No such document");
                     }
 
                 } else {
-                    Log.d("message", "Error getting documents: ", task.getException());
+                    Log.d("getLatestMessage", "Error getting documents: ", task.getException());
                 }
             }
         });
+        adapter.notifyDataSetChanged();
     }
 
 }
