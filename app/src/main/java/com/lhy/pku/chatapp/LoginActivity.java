@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         registerTxv = findViewById(R.id.register_txv);
         loginTxv = findViewById(R.id.login_txv);
         progressBar = findViewById(R.id.login_progressbar);
-        dimView = findViewById(R.id.dim_view);
+        dimView = findViewById(R.id.login_dim_view);
     }
 
     private void setClickHandler() {
