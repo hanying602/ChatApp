@@ -63,7 +63,6 @@ public class ChatListFragment extends Fragment {
     }
 
     private void initAdapter() {
-        RecyclerView recyclerView = view.findViewById(R.id.chatlist_recyclerview);
         chatRoomList = new ArrayList<>();
         adapter = new ChatListAdapter(chatRoomList);
         Consumer<LatestMessage> mClickConsumer = new Consumer<LatestMessage>() {

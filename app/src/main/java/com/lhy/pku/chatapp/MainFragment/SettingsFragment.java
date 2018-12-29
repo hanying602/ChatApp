@@ -38,7 +38,7 @@ public class SettingsFragment extends Fragment {
         DocumentSnapshot user = UserInfo.getInstance().getUserSnapshot();
         usernameTxv.setText(user.getString("username"));
         userIDTxv.setText(user.getId());
-        
+
     }
     private void setClickHandler(){
         logoutTxv.setOnClickListener(new View.OnClickListener() {
