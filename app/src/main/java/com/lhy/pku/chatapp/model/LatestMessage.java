@@ -13,6 +13,7 @@ public class LatestMessage extends BaseObservable implements Comparable<LatestMe
     private String content;
     private Date time;
     private String userID;
+    private String roomID;
 
     @Bindable
     public String getContent() {
@@ -41,7 +42,13 @@ public class LatestMessage extends BaseObservable implements Comparable<LatestMe
         this.time = time;
     }
 
+    public String getRoomID() {
+        return roomID;
+    }
 
+    public void setRoomID(String roomID) {
+        this.roomID = roomID;
+    }
 
     public String dateStr() {
         return time == null ? "" : DateHelper.formatDateToString(time);

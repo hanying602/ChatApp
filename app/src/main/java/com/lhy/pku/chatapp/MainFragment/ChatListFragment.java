@@ -1,5 +1,6 @@
 package com.lhy.pku.chatapp.MainFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.lhy.pku.chatapp.Adapter.ChatListAdapter;
+import com.lhy.pku.chatapp.ChatRoomActivity;
 import com.lhy.pku.chatapp.Config.UserInfo;
 import com.lhy.pku.chatapp.model.LatestMessage;
 import com.lhy.pku.chatapp.R;
@@ -68,6 +70,7 @@ public class ChatListFragment extends Fragment {
         Consumer<LatestMessage> mClickConsumer = new Consumer<LatestMessage>() {
             @Override
             public void accept(@NonNull LatestMessage message) throws Exception {
+               intentToChatRoom(message.getRoomID());
             }
         };
         adapter.getPositionClicks().subscribe(mClickConsumer);
@@ -75,6 +78,12 @@ public class ChatListFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void intentToChatRoom(String roomID) {
+        Intent intent = new Intent();
+        intent.putExtra("room_id", roomID);
+        startActivity(intent.setClass(getContext(), ChatRoomActivity.class));
     }
 
     private void getChatList() {
@@ -99,7 +108,7 @@ public class ChatListFragment extends Fragment {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
                                     List<DocumentReference> membersList = (List<DocumentReference>)document.get("members");
                                     String otherUserID = membersList.get(0).getId().equals(userRef.getId()) ? membersList.get(1).getId() : membersList.get(0).getId();
-                                    getLatestMessage(document.getDocumentReference("latest_message").getPath(),otherUserID);
+                                    getLatestMessage(document,otherUserID);
                                 }
                             } else {
                                 hideProgressbar();
@@ -115,22 +124,21 @@ public class ChatListFragment extends Fragment {
 
     }
 
-    private void getLatestMessage(String path, final String otherUserID) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.document(path).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    private void getLatestMessage(final DocumentSnapshot documentSnapshot, final String otherUserID) {
+        documentSnapshot.getDocumentReference("latest_message").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     if (task.getResult().exists()) {
 
                         tempCount++;
-
                         DocumentSnapshot document = task.getResult();
                         Log.d("getLatestMessage", document.getId() + " => " + document.getData());
                         LatestMessage latestMessage = new LatestMessage();
                         latestMessage.setContent(document.getString("content"));
                         latestMessage.setTime(document.getDate("time"));
                         latestMessage.setUserID(otherUserID);
+                        latestMessage.setRoomID(documentSnapshot.getId());
                         chatRoomList.add(latestMessage);
 
                         if(tempCount==chatRoomCount) {

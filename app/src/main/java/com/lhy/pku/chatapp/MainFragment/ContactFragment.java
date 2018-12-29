@@ -1,5 +1,6 @@
 package com.lhy.pku.chatapp.MainFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.lhy.pku.chatapp.Adapter.ContactListAdapter;
+import com.lhy.pku.chatapp.ChatRoomActivity;
 import com.lhy.pku.chatapp.Config.UserInfo;
 import com.lhy.pku.chatapp.R;
 import com.lhy.pku.chatapp.model.Contact;
@@ -32,7 +34,8 @@ import io.reactivex.functions.Consumer;
 public class ContactFragment extends Fragment {
 
     private View view;
-    private static final String TAG = ContactFragment.class.getSimpleName();private RecyclerView recyclerView;
+    private static final String TAG = ContactFragment.class.getSimpleName();
+    private RecyclerView recyclerView;
     private ContactListAdapter adapter;
     private List<Contact> contactList;
     private ProgressBar progressBar;
@@ -64,6 +67,7 @@ public class ContactFragment extends Fragment {
         Consumer<Contact> mClickConsumer = new Consumer<Contact>() {
             @Override
             public void accept(@NonNull Contact contact) throws Exception {
+                findRoomByUser(contact.getUserRef());
             }
         };
         adapter.getPositionClicks().subscribe(mClickConsumer);
@@ -71,6 +75,41 @@ public class ContactFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void intentToChatRoom(String roomID) {
+        Intent intent = new Intent();
+        intent.putExtra("room_id", roomID);
+        startActivity(intent.setClass(getContext(), ChatRoomActivity.class));
+    }
+
+    private void findRoomByUser(final DocumentReference otherUserRef){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Chatroom")
+                .whereArrayContains("members", userRef)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    if(((List<DocumentReference>)document.get("members")).contains(otherUserRef)){
+                                        intentToChatRoom(document.getId());
+                                    }
+                                }
+                            } else {
+                                hideProgressbar();
+                                Log.d(TAG, "No such document");
+                            }
+
+                        } else {
+                            hideProgressbar();
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
     }
 
     private void getContactList() {
@@ -93,6 +132,7 @@ public class ContactFragment extends Fragment {
                                     if(!document.getId().equals(userRef.getId())){
                                         Contact contact = new Contact();
                                         contact.setUserID(document.getId());
+                                        contact.setUserRef(document.getReference());
                                         contactList.add(contact);
                                     }
                                 }
