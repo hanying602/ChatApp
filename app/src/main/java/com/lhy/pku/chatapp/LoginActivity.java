@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         if (task.getResult().exists()) {
-                            UserInfo.getInstance().setUserReference(task.getResult().getReference());
+                            UserInfo.getInstance().setUserSnapshot(task.getResult());
                             toMainActivity();
                         } else {
                             hideProgressbar();
@@ -121,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (password.equals(document.get("password"))) {
                             Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
-                            UserInfo.getInstance().setUserReference(userRef);
+                            UserInfo.getInstance().setUserSnapshot(task.getResult());
                             SharedPreferences pref = getSharedPreferences("config", MODE_PRIVATE);
                             pref.edit().putString("USER", userRef.getPath()).apply();
                             hideProgressbar();

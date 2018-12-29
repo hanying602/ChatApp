@@ -1,11 +1,12 @@
 package com.lhy.pku.chatapp.Config;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class UserInfo {
 
     private static UserInfo userInfo = null;
-    private DocumentReference userReference;
+    private DocumentSnapshot userSnapshot;
     private UserInfo() {
 
     }
@@ -17,14 +18,15 @@ public class UserInfo {
         return(userInfo);
     }
 
-    public DocumentReference getUserReference() {
-        return userReference;
+    public DocumentSnapshot getUserSnapshot() {
+        return userSnapshot;
     }
 
-    public void setUserReference(DocumentReference userReference) {
-        this.userReference = userReference;
+    public void setUserSnapshot(DocumentSnapshot userSnapshot) {
+        this.userSnapshot = userSnapshot;
     }
+
     public void clearAllData(){
-        userReference=null;
+        userSnapshot=null;
     }
 }

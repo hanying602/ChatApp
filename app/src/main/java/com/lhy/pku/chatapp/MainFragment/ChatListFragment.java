@@ -83,7 +83,7 @@ public class ChatListFragment extends Fragment {
         tempCount = 0;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        userRef = UserInfo.getInstance().getUserReference();
+        userRef = UserInfo.getInstance().getUserSnapshot().getReference();
 
         showProgressbar();
         db.collection("Chatroom")
