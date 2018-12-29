@@ -2,12 +2,13 @@ package com.lhy.pku.chatapp.model;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.support.annotation.NonNull;
 
 import com.lhy.pku.chatapp.Util.DateHelper;
 
 import java.util.Date;
 
-public class LatestMessage extends BaseObservable{
+public class LatestMessage extends BaseObservable implements Comparable<LatestMessage>{
 
     private String content;
     private Date time;
@@ -44,5 +45,9 @@ public class LatestMessage extends BaseObservable{
 
     public String dateStr() {
         return time == null ? "" : DateHelper.formatDateToString(time);
+    }
+    @Override
+    public int compareTo(@NonNull LatestMessage o) {
+        return o.getTime().compareTo(getTime());
     }
 }

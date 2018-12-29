@@ -24,4 +24,7 @@ public class UserInfo {
     public void setUserReference(DocumentReference userReference) {
         this.userReference = userReference;
     }
+    public void clearAllData(){
+        userReference=null;
+    }
 }

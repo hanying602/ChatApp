@@ -25,6 +25,7 @@ import com.lhy.pku.chatapp.model.LatestMessage;
 import com.lhy.pku.chatapp.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
@@ -134,6 +135,7 @@ public class ChatListFragment extends Fragment {
                         chatRoomList.add(latestMessage);
 
                         if(tempCount==chatRoomCount) {
+                            Collections.sort(chatRoomList);
                             adapter.notifyDataSetChanged();
                             hideProgressbar();
                         }

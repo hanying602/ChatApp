@@ -1,6 +1,7 @@
 package com.lhy.pku.chatapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,8 +38,35 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+
         initView();
         setClickHandler();
+        SharedPreferences pref = getSharedPreferences("config", MODE_PRIVATE);
+        if(!"".equals(pref.getString("USER",""))){
+            showProgressbar();
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.document(pref.getString("USER","")).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        if (task.getResult().exists()) {
+                            UserInfo.getInstance().setUserReference(task.getResult().getReference());
+                            toMainActivity();
+                        } else {
+                            hideProgressbar();
+                            Toast.makeText(LoginActivity.this, "No such document", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "No such document");
+                        }
+
+                    } else {
+                        hideProgressbar();
+                        Toast.makeText(LoginActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                }
+            });
+        }
+
     }
 
     private void initView() {
@@ -94,6 +122,8 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
                             UserInfo.getInstance().setUserReference(userRef);
+                            SharedPreferences pref = getSharedPreferences("config", MODE_PRIVATE);
+                            pref.edit().putString("USER", userRef.getPath()).apply();
                             hideProgressbar();
                             toMainActivity();
                         } else {
